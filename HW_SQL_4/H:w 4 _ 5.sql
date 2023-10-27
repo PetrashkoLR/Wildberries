@@ -5,11 +5,16 @@
 
 
 SELECT 
-  seller_id, 
-  STRING_AGG(category,'-' ORDER BY category) AS category_pair 
+  seller_id,
+  STRING_AGG(category,'-' ORDER BY category) AS category_pair
 FROM sellers
-WHERE EXTRACT(YEAR FROM (to_date(date, 'DD MM YYYY'))) = 2022
+-- Уточню, что с данным условие WHERE отбираются категории, зарегистрированные продавцом в 2022 году и 
+-- далее условие 'продающих ровно две категории' звучит как 'продающих ровно две категории в 2022 году'
+-- Если закомментить условие WHERE и раскомментить третье условие на HAVING (and min() ), то получится решение
+-- для продавцов, кто именно сам зарегистрировался в 2022 году. Но в данном случае продавцов, которые удовлетворяют всем
+-- этим условиям не найдется и вывод будет пустым :(
+WHERE EXTRACT(YEAR FROM (to_date(date_reg, 'DD MM YYYY'))) = 2022
 GROUP BY seller_id
-HAVING COUNT(category) = 2 AND SUM(revenue) > 75000
+HAVING COUNT(category) = 2 AND SUM(revenue) > 75000 --AND MIN(EXTRACT(YEAR FROM (to_date(date_reg, 'DD MM YYYY')))) = 2022
 ORDER BY seller_id;
 
